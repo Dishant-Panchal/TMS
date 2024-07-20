@@ -6,14 +6,9 @@ namespace TMS.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TaskNotesController : ControllerBase
+    public class TaskNotesController(ITaskNotesService taskNotesService) : ControllerBase
     {
-        private readonly ITaskNotesService _taskNotesService;
-
-        public TaskNotesController(ITaskNotesService taskNotesService)
-        {
-            _taskNotesService = taskNotesService;
-        }
+        private readonly ITaskNotesService _taskNotesService = taskNotesService;
 
         [HttpGet("get-task-notes/{taskId}")]
         public async Task<ActionResult<TaskNote>> GetByTaskId(int taskId)

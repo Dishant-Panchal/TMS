@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace TMS.Domain.Models;
 
@@ -18,6 +16,10 @@ public partial class TMSContext : DbContext
     public virtual DbSet<Employee> Employees { get; set; }
 
     public virtual DbSet<EmployeeTask> EmployeeTasks { get; set; }
+
+    public virtual DbSet<ErrorLog> ErrorLogs { get; set; }
+
+    public virtual DbSet<TaskAttachment> TaskAttachments { get; set; }
 
     public virtual DbSet<TaskNote> TaskNotes { get; set; }
 
@@ -42,7 +44,13 @@ public partial class TMSContext : DbContext
 
             entity.ToTable("EmployeeTask");
 
-            entity.Property(e => e.DueDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDateTime)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DueDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsCompleted).HasDefaultValue(false);
             entity.Property(e => e.Title).HasMaxLength(50);
 
             entity.HasOne(d => d.Employee).WithMany(p => p.EmployeeTasks)
@@ -50,9 +58,40 @@ public partial class TMSContext : DbContext
                 .HasConstraintName("FK_Tasks_Employee");
         });
 
+        modelBuilder.Entity<ErrorLog>(entity =>
+        {
+            entity.ToTable("ErrorLog");
+
+            entity.Property(e => e.CreatedDateTime)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<TaskAttachment>(entity =>
+        {
+            entity.ToTable("TaskAttachment");
+
+            entity.Property(e => e.CreatedDateTime)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FileExtension)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.FileName).HasMaxLength(100);
+
+            entity.HasOne(d => d.Task).WithMany(p => p.TaskAttachments)
+                .HasForeignKey(d => d.TaskId)
+                .HasConstraintName("FK_TaskAttachment_EmployeeTask");
+        });
+
         modelBuilder.Entity<TaskNote>(entity =>
         {
             entity.Property(e => e.Note).HasMaxLength(500);
+
+            entity.HasOne(d => d.Task).WithMany(p => p.TaskNotes)
+                .HasForeignKey(d => d.TaskId)
+                .HasConstraintName("FK_TaskNotes_EmployeeTask");
         });
 
         OnModelCreatingPartial(modelBuilder);

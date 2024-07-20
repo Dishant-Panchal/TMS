@@ -3,13 +3,9 @@ using TMS.Domain.Models;
 
 namespace TMS.Infrastructure.Repositories
 {
-    public class TaskNotesRepository : ITaskNotesRepository
+    public class TaskNotesRepository(TMSContext context) : ITaskNotesRepository
     {
-        private readonly TMSContext _context;
-        public TaskNotesRepository(TMSContext context)
-        {
-            _context = context;
-        }
+        private readonly TMSContext _context = context;
 
         public async Task<IEnumerable<TaskNote>> GetByTaskIdAsync(int taskId)
         {

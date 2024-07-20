@@ -1,0 +1,1 @@
+Scaffold-DbContext "Data Source=.\SQLEXPRESS;Initial Catalog=TMS;Trusted_Connection=SSPI;TrustServerCertificate=true" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models -Context TMSContext -force

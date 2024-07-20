@@ -3,26 +3,27 @@ using TMS.Domain.Models;
 
 namespace TMS.Infrastructure.Repositories
 {
-    public class TaskRepository : ITaskRepository
+    public class TaskRepository(TMSContext context) : ITaskRepository
     {
-        private readonly TMSContext _context;
-        public TaskRepository(TMSContext context)
-        {
-            _context = context;
-        }
+        private readonly TMSContext _context = context;
 
         public async Task<IEnumerable<EmployeeTask>> GetAllAsync()
         {
-            return await _context.EmployeeTasks.Include(t => t.Employee).ToListAsync();
+            return await _context.EmployeeTasks
+                .Include(t => t.Employee)
+                .Include(n => n.TaskNotes)
+                .Include(a => a.TaskAttachments)
+                .ToListAsync();
         }
 
         public async Task<EmployeeTask?> GetByIdAsync(int id)
         {
-            EmployeeTask? employeeTask = new();
-            employeeTask = await _context.EmployeeTasks.FindAsync(id);
+            EmployeeTask? employeeTask = await _context.EmployeeTasks.FindAsync(id);
             if (employeeTask is not null)
             {
                 employeeTask.Employee = await _context.Employees.FindAsync(employeeTask.EmployeeId);
+                employeeTask.TaskAttachments = await _context.TaskAttachments.Where(x => x.TaskId == id).ToListAsync();
+                employeeTask.TaskNotes = await _context.TaskNotes.Where(x => x.TaskId == id).ToListAsync();
             }
             return employeeTask;
         }
@@ -62,7 +63,12 @@ namespace TMS.Infrastructure.Repositories
 
         public async Task<IEnumerable<EmployeeTask>> GetTeamTasksAsync(int managerId)
         {
-            return await _context.EmployeeTasks.Where(x => x.Employee.ManagerId == managerId).Include(t => t.Employee).ToListAsync();
+            return await _context.EmployeeTasks
+                .Include(t => t.Employee)
+                .Include(n => n.TaskNotes)
+                .Include(a => a.TaskAttachments)
+                .Where(x => x.Employee.ManagerId == managerId)
+                .ToListAsync();
         }
     }
 

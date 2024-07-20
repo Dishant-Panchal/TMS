@@ -3,14 +3,9 @@ using TMS.Infrastructure.Repositories;
 
 namespace TMS.Infrastructure.Services
 {
-    public class TaskService : ITaskService
+    public class TaskService(ITaskRepository taskRepository) : ITaskService
     {
-        private readonly ITaskRepository _taskRepository;
-
-        public TaskService(ITaskRepository taskRepository)
-        {
-            _taskRepository = taskRepository;
-        }
+        private readonly ITaskRepository _taskRepository = taskRepository;
 
         public async Task<IEnumerable<EmployeeTask>> GetAllTasksAsync()
         {

@@ -1,4 +1,4 @@
-
+using TMS.Api.Helpers;
 using TMS.Domain.Models;
 using TMS.Infrastructure.Repositories;
 using TMS.Infrastructure.Services;
@@ -18,12 +18,21 @@ namespace TMS.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddDbContext<TMSContext>(ServiceLifetime.Transient);
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            builder.Services.AddDbContext<TMSContext>(ServiceLifetime.Singleton);
 
             builder.Services.AddTransient<ITaskRepository, TaskRepository>();
             builder.Services.AddTransient<ITaskService, TaskService>();
             builder.Services.AddTransient<ITaskNotesRepository, TaskNotesRepository>();
             builder.Services.AddTransient<ITaskNotesService, TaskNotesService>();
+            builder.Services.AddTransient<ITaskAttachmentRepository, TaskAttachmentRepository>();
+            builder.Services.AddTransient<ITaskAttachmentService, TaskAttachmentService>();
+            builder.Services.AddTransient<IErrorLogRepository, ErrorLogRepository>();
+            builder.Services.AddTransient<IErrorLogService, ErrorLogService>();
+
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             var app = builder.Build();
 
@@ -38,6 +47,7 @@ namespace TMS.Api
 
             app.UseAuthorization();
 
+            app.UseExceptionHandler();
 
             app.MapControllers();
 
