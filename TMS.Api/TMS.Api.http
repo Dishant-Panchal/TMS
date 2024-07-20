@@ -1,0 +1,6 @@
+@TMS.Api_HostAddress = http://localhost:5242/api
+
+GET {{TMS.Api_HostAddress}}/getall/
+Accept: application/json
+
+###
